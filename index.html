@@ -306,13 +306,18 @@
 
     .day {
       background: white;
-      padding: 5px 3px;
-      min-height: 78px;
+      padding: 7px 4px;
+      min-height: 92px;
       position: relative;
-      font-size: 12px;
+      font-size: 12.5px;
       font-weight: 700;
       min-width: 0;
       overflow: hidden;
+      cursor: pointer;
+    }
+
+    .day .day-num {
+      margin-bottom: 5px;
     }
 
     .day.empty {
@@ -1235,7 +1240,7 @@
         </span>
       </label>
       <p class="notif-note">📱 알림은 <strong>홈화면에 설치된 앱</strong>에서 작동해요 (iOS 16.4 이상). 앱을 열 때 일정을 확인해서 알려주며, 같은 일정은 하루에 한 번만 알려드려요.</p>
-      <p style="text-align:center;font-size:11px;color:#B8AEA4;margin-bottom:12px;">언집리스트 <strong>v23</strong></p>
+      <p style="text-align:center;font-size:11px;color:#B8AEA4;margin-bottom:12px;">언집리스트 <strong>v24</strong></p>
       <div class="form-actions">
         <button type="button" class="btn btn-primary" onclick="closeSettings()">닫기</button>
       </div>
@@ -1323,6 +1328,22 @@
       renderList();
       registerServiceWorker();
       checkAndNotify();
+
+      // Swipe left/right on the calendar to change months
+      let touchStartX = 0, touchStartY = 0;
+      const calArea = document.getElementById('calendar');
+      calArea.addEventListener('touchstart', e => {
+        touchStartX = e.touches[0].clientX;
+        touchStartY = e.touches[0].clientY;
+      }, { passive: true });
+      calArea.addEventListener('touchend', e => {
+        const dx = e.changedTouches[0].clientX - touchStartX;
+        const dy = e.changedTouches[0].clientY - touchStartY;
+        if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy) * 1.5) {
+          if (dx < 0) nextMonth();
+          else prevMonth();
+        }
+      }, { passive: true });
 
       // Re-check whenever the app comes back to the foreground
       document.addEventListener('visibilitychange', () => {
@@ -1671,10 +1692,10 @@
           const info = getTag(it.tag);
           const done = tasksCompleted[it.itemKey] ? ' done' : '';
           const memoMark = memos[it.itemKey] ? ' 📝' : '';
-          return `<div class="day-item${done}" style="border-left-color:${info.color};background:${lightBg(info.color)}" onclick="openDetail('${it.itemKey}')">${info.label}·${it.name}${memoMark}</div>`;
+          return `<div class="day-item${done}" style="border-left-color:${info.color};background:${lightBg(info.color)}" onclick="event.stopPropagation();openDetail('${it.itemKey}')">${info.label}·${it.name}${memoMark}</div>`;
         }).join('');
         const todayCls = date.toDateString() === todayStr ? ' today' : '';
-        html += `<div class="day${todayCls}"><div class="day-num">${day}</div>${itemsHtml ? `<div class="day-items">${itemsHtml}</div>` : ''}</div>`;
+        html += `<div class="day${todayCls}" onclick="dayTapped('${fmtISO(date)}')"><div class="day-num">${day}</div>${itemsHtml ? `<div class="day-items">${itemsHtml}</div>` : ''}</div>`;
       }
 
       document.getElementById('calendar-grid').innerHTML = html;
@@ -2082,6 +2103,11 @@
     }
 
     // Form functions
+    function dayTapped(iso) {
+      showForm();
+      document.getElementById('uploadDateInput').value = iso;
+    }
+
     let editingId = null;
 
     function showForm() {
