@@ -321,6 +321,7 @@
 
     .day .day-num {
       margin-bottom: 3px;
+      font-size: var(--daynum-fs, 12.5px);
     }
 
     .day.empty {
@@ -349,7 +350,7 @@
       background: white;
       border: 1px solid var(--line);
       border-radius: 14px;
-      padding: 15px 16px;
+      padding: 12px 14px;
       margin-bottom: 16px;
     }
 
@@ -358,14 +359,41 @@
       justify-content: space-between;
       align-items: baseline;
       font-family: 'Gothic A1', -apple-system, 'Apple SD Gothic Neo', sans-serif;
-      font-size: 14.5px;
+      font-size: 12.5px;
       font-weight: 800;
       color: var(--ink);
     }
 
     .week-head .count {
-      font-size: 13px;
+      font-size: 11.5px;
       color: #3D7E62;
+    }
+
+    .size-seg {
+      display: flex;
+      gap: 3px;
+      background: #EDE4D6;
+      border-radius: 10px;
+      padding: 3px;
+    }
+
+    .size-seg button {
+      flex: 1;
+      padding: 8px 6px;
+      background: transparent;
+      border: none;
+      border-radius: 7px;
+      color: var(--soft);
+      font-weight: 700;
+      font-size: 12px;
+      cursor: pointer;
+      font-family: inherit;
+    }
+
+    .size-seg button.active {
+      background: white;
+      color: var(--ink);
+      box-shadow: 0 1px 3px rgba(43, 35, 32, 0.10);
     }
 
     .progress-track {
@@ -395,7 +423,8 @@
     }
 
     .day-item {
-      font-size: 9px;
+      font-size: var(--item-fs, 9px);
+      font-weight: 400;
       padding: 2px 3px;
       max-width: 100%;
       min-width: 0;
@@ -1250,10 +1279,18 @@
                onchange="onTitleChange(this.value)">
       </div>
       <div class="form-group">
+        <label>캘린더 글자 크기</label>
+        <div class="size-seg" id="sizeSeg">
+          <button type="button" onclick="pickCalSize('small')">작게</button>
+          <button type="button" onclick="pickCalSize('normal')">보통</button>
+          <button type="button" onclick="pickCalSize('large')">크게</button>
+        </div>
+      </div>
+      <div class="form-group">
         <label>배경 색상 (오른쪽 아래 🎨 = 자유 색상)</label>
         <div class="palette" id="bgPalette"></div>
       </div>
-      <p style="text-align:center;font-size:11px;color:#B8AEA4;margin-bottom:12px;">앱 버전 <strong>v28</strong></p>
+      <p style="text-align:center;font-size:11px;color:#B8AEA4;margin-bottom:12px;">앱 버전 <strong>v29</strong></p>
       <div class="form-actions">
         <button type="button" class="btn btn-primary" onclick="closeSettings()">닫기</button>
       </div>
@@ -1327,6 +1364,12 @@
     const DEFAULT_BG = '#FBF7F2';
     const DEFAULT_TITLE = 'Schedules';
     let appTitle = DEFAULT_TITLE;
+    let calSize = 'normal';
+    const CAL_SIZES = {
+      small: { item: '8px', num: '11px' },
+      normal: { item: '9px', num: '12.5px' },
+      large: { item: '10.5px', num: '14px' }
+    };
     const BG_PRESETS = ['#FBF7F2', '#FFF4F6', '#FAF1E8', '#F4F7F1', '#EFF4FA', '#F5F1FA', '#FDFBF6', '#F1EEE9', '#FFFFFF'];
     let themeBg = DEFAULT_BG;
     let notifEnabled = false;
@@ -1405,6 +1448,23 @@
       if (meta) meta.setAttribute('content', themeBg);
       document.getElementById('appTitle').textContent = appTitle;
       document.title = appTitle;
+      const sz = CAL_SIZES[calSize] || CAL_SIZES.normal;
+      document.documentElement.style.setProperty('--item-fs', sz.item);
+      document.documentElement.style.setProperty('--daynum-fs', sz.num);
+    }
+
+    function pickCalSize(size) {
+      calSize = size;
+      applyTheme();
+      saveData();
+      renderSizeSeg();
+    }
+
+    function renderSizeSeg() {
+      const order = ['small', 'normal', 'large'];
+      [...document.querySelectorAll('#sizeSeg button')].forEach((b, i) => {
+        b.classList.toggle('active', order[i] === calSize);
+      });
     }
 
     function onTitleChange(v) {
@@ -1437,6 +1497,7 @@
       const box = document.getElementById('notifToggle');
       box.checked = notifEnabled && typeof Notification !== 'undefined' && Notification.permission === 'granted';
       renderBgPalette();
+      renderSizeSeg();
       document.getElementById('titleInput').value = appTitle;
       document.getElementById('settingsModal').classList.add('active');
     }
@@ -1641,6 +1702,7 @@
         const t = JSON.parse(storedTheme);
         themeBg = t.bg || DEFAULT_BG;
         appTitle = t.title || DEFAULT_TITLE;
+        calSize = t.calSize || 'normal';
       }
     }
 
@@ -1652,7 +1714,7 @@
       localStorage.setItem(DISMISS_KEY, JSON.stringify(dismissedAlerts));
       localStorage.setItem(CUSTOM_TAGS_KEY, JSON.stringify(customTags));
       localStorage.setItem(NOTIF_KEY, JSON.stringify({ enabled: notifEnabled, log: notifLog }));
-      localStorage.setItem(THEME_KEY, JSON.stringify({ bg: themeBg, title: appTitle }));
+      localStorage.setItem(THEME_KEY, JSON.stringify({ bg: themeBg, title: appTitle, calSize: calSize }));
     }
 
     // Tab switching
