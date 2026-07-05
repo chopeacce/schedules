@@ -1,6 +1,6 @@
 {
-  "name": "언집리스트",
-  "short_name": "언집리스트",
+  "name": "Schedules",
+  "short_name": "Schedules",
   "description": "콘텐츠 & 협업 캘린더",
   "start_url": "./index.html",
   "scope": "./",
