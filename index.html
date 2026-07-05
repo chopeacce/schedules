@@ -16,7 +16,7 @@
   <title>Schedules</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Jua&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Gothic+A1:wght@700;800&display=swap" rel="stylesheet">
   <style>
     :root {
       --paper: #FBF7F2;
@@ -81,12 +81,12 @@
     }
 
     .header-title h1 {
-      font-family: 'Jua', -apple-system, 'Apple SD Gothic Neo', sans-serif;
-      font-size: 25px;
-      font-weight: 400;
+      font-family: 'Gothic A1', -apple-system, 'Apple SD Gothic Neo', sans-serif;
+      font-size: 23px;
+      font-weight: 800;
       margin-bottom: 3px;
       color: var(--ink);
-      letter-spacing: 0;
+      letter-spacing: -0.4px;
     }
 
     .header-title p {
@@ -264,10 +264,10 @@
     }
 
     .calendar-header h2 {
-      font-family: 'Jua', -apple-system, 'Apple SD Gothic Neo', sans-serif;
-      font-size: 21px;
-      font-weight: 400;
-      letter-spacing: 0;
+      font-family: 'Gothic A1', -apple-system, 'Apple SD Gothic Neo', sans-serif;
+      font-size: 19px;
+      font-weight: 800;
+      letter-spacing: -0.3px;
     }
 
     .nav-btn {
@@ -357,9 +357,9 @@
       display: flex;
       justify-content: space-between;
       align-items: baseline;
-      font-family: 'Jua', -apple-system, 'Apple SD Gothic Neo', sans-serif;
-      font-size: 15px;
-      font-weight: 400;
+      font-family: 'Gothic A1', -apple-system, 'Apple SD Gothic Neo', sans-serif;
+      font-size: 14.5px;
+      font-weight: 800;
       color: var(--ink);
     }
 
@@ -516,9 +516,9 @@
 
     /* Today tab */
     .section-title {
-      font-family: 'Jua', -apple-system, 'Apple SD Gothic Neo', sans-serif;
-      font-size: 17px;
-      font-weight: 400;
+      font-family: 'Gothic A1', -apple-system, 'Apple SD Gothic Neo', sans-serif;
+      font-size: 16px;
+      font-weight: 800;
       color: var(--ink);
       padding-bottom: 8px;
       border-bottom: 2px solid #E3D5C8;
@@ -1137,7 +1137,7 @@
   <div id="app">
     <div class="header">
       <div class="header-title">
-        <h1>Schedules</h1>
+        <h1 id="appTitle">Schedules</h1>
         <p>콘텐츠 & 협업 캘린더</p>
       </div>
       <button class="btn-icon" onclick="openSettings()">🔔</button>
@@ -1244,10 +1244,16 @@
       </label>
       <p class="notif-note">📱 알림은 <strong>홈화면에 설치된 앱</strong>에서 작동해요 (iOS 16.4 이상). 앱을 열 때 일정을 확인해서 알려주며, 같은 일정은 하루에 한 번만 알려드려요.</p>
       <div class="form-group">
+        <label>앱 제목</label>
+        <input type="text" id="titleInput" placeholder="Schedules" maxlength="20"
+               style="width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:6px;font-size:14px;box-sizing:border-box;-webkit-user-select:text;user-select:text;"
+               onchange="onTitleChange(this.value)">
+      </div>
+      <div class="form-group">
         <label>배경 색상 (오른쪽 아래 🎨 = 자유 색상)</label>
         <div class="palette" id="bgPalette"></div>
       </div>
-      <p style="text-align:center;font-size:11px;color:#B8AEA4;margin-bottom:12px;">Schedules <strong>v26</strong></p>
+      <p style="text-align:center;font-size:11px;color:#B8AEA4;margin-bottom:12px;">앱 버전 <strong>v27</strong></p>
       <div class="form-actions">
         <button type="button" class="btn btn-primary" onclick="closeSettings()">닫기</button>
       </div>
@@ -1319,6 +1325,8 @@
     const NOTIF_KEY = 'unziplist-notif';
     const THEME_KEY = 'unziplist-theme';
     const DEFAULT_BG = '#FBF7F2';
+    const DEFAULT_TITLE = 'Schedules';
+    let appTitle = DEFAULT_TITLE;
     const BG_PRESETS = ['#FBF7F2', '#FFF4F6', '#FAF1E8', '#F4F7F1', '#EFF4FA', '#F5F1FA', '#FDFBF6', '#F1EEE9', '#FFFFFF'];
     let themeBg = DEFAULT_BG;
     let notifEnabled = false;
@@ -1395,6 +1403,14 @@
       document.documentElement.style.setProperty('--paper', themeBg);
       const meta = document.querySelector('meta[name="theme-color"]');
       if (meta) meta.setAttribute('content', themeBg);
+      document.getElementById('appTitle').textContent = appTitle;
+      document.title = appTitle;
+    }
+
+    function onTitleChange(v) {
+      appTitle = v.trim() || DEFAULT_TITLE;
+      applyTheme();
+      saveData();
     }
 
     function renderBgPalette() {
@@ -1421,6 +1437,7 @@
       const box = document.getElementById('notifToggle');
       box.checked = notifEnabled && typeof Notification !== 'undefined' && Notification.permission === 'granted';
       renderBgPalette();
+      document.getElementById('titleInput').value = appTitle;
       document.getElementById('settingsModal').classList.add('active');
     }
 
@@ -1621,7 +1638,9 @@
 
       const storedTheme = localStorage.getItem(THEME_KEY);
       if (storedTheme) {
-        themeBg = JSON.parse(storedTheme).bg || DEFAULT_BG;
+        const t = JSON.parse(storedTheme);
+        themeBg = t.bg || DEFAULT_BG;
+        appTitle = t.title || DEFAULT_TITLE;
       }
     }
 
@@ -1633,7 +1652,7 @@
       localStorage.setItem(DISMISS_KEY, JSON.stringify(dismissedAlerts));
       localStorage.setItem(CUSTOM_TAGS_KEY, JSON.stringify(customTags));
       localStorage.setItem(NOTIF_KEY, JSON.stringify({ enabled: notifEnabled, log: notifLog }));
-      localStorage.setItem(THEME_KEY, JSON.stringify({ bg: themeBg }));
+      localStorage.setItem(THEME_KEY, JSON.stringify({ bg: themeBg, title: appTitle }));
     }
 
     // Tab switching
