@@ -1,0 +1,25 @@
+{
+  "name": "언집리스트",
+  "short_name": "언집리스트",
+  "description": "콘텐츠 & 협업 캘린더",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#FBF7F2",
+  "theme_color": "#5B8FD6",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "icon-192-v2.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icon-512-v2.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
