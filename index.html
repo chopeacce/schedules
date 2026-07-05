@@ -218,16 +218,19 @@
 
     .tab-nav {
       display: flex;
-      gap: 8px;
+      gap: 4px;
       margin-bottom: 16px;
+      background: #EDE4D6;
+      border-radius: 14px;
+      padding: 4px;
     }
 
     .tab-btn {
       flex: 1;
-      padding: 11px 8px;
-      background: white;
-      border: 1.5px solid var(--line);
-      border-radius: 12px;
+      padding: 10px 6px;
+      background: transparent;
+      border: none;
+      border-radius: 11px;
       color: var(--soft);
       font-weight: 700;
       font-size: 13px;
@@ -236,9 +239,9 @@
     }
 
     .tab-btn.active {
-      background: #5C7CA8;
-      border-color: #5C7CA8;
-      color: white;
+      background: white;
+      color: var(--ink);
+      box-shadow: 0 1px 4px rgba(43, 35, 32, 0.10);
     }
 
     .tab-content {
@@ -280,20 +283,22 @@
       display: grid;
       grid-template-columns: repeat(7, minmax(0, 1fr));
       width: 100%;
-      gap: 3px;
-      background: transparent;
+      gap: 1px;
+      background: var(--line);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      overflow: hidden;
       padding: 0;
-      margin-bottom: 20px;
+      margin-bottom: 16px;
     }
 
     .weekday {
-      background: #EFE6DA;
-      padding: 8px 2px;
+      background: #E9DFCF;
+      padding: 10px 2px;
       text-align: center;
       font-weight: 700;
       font-size: 11px;
       color: #6E6156;
-      border-radius: 8px;
     }
 
     .weekday.sun { color: #C2606C; }
@@ -301,10 +306,8 @@
 
     .day {
       background: white;
-      border: 1px solid var(--line);
-      border-radius: 8px;
-      padding: 4px 3px;
-      min-height: 76px;
+      padding: 5px 3px;
+      min-height: 78px;
       position: relative;
       font-size: 12px;
       font-weight: 700;
@@ -313,17 +316,63 @@
     }
 
     .day.empty {
-      background: transparent;
-      border-color: transparent;
+      background: #F4EEE5;
     }
 
     .day.today {
-      border: 2px solid #C77E8A;
       background: #FDF4F5;
+      box-shadow: inset 0 0 0 2px #C77E8A;
     }
 
     .day.today .day-num {
-      color: #B0525F;
+      background: #C77E8A;
+      color: white;
+      width: 21px;
+      height: 21px;
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+    }
+
+    /* Week progress card */
+    .week-card {
+      background: white;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 15px 16px;
+      margin-bottom: 16px;
+    }
+
+    .week-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      font-family: Georgia, 'Noto Serif KR', 'Apple Myungjo', serif;
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--ink);
+    }
+
+    .week-head .count {
+      font-size: 13px;
+      color: #3D7E62;
+    }
+
+    .progress-track {
+      height: 9px;
+      background: #EFE7DC;
+      border-radius: 5px;
+      margin-top: 11px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #6FB596, #4F9E7B);
+      border-radius: 5px;
+      transition: width 0.3s;
     }
 
     .day-num {
@@ -1105,6 +1154,7 @@
           <button class="nav-btn" onclick="nextMonth()">→</button>
         </div>
         <div class="calendar-grid" id="calendar-grid"></div>
+        <div class="week-card" id="weekProgress"></div>
       </div>
 
       <!-- Today Tab -->
@@ -1185,7 +1235,7 @@
         </span>
       </label>
       <p class="notif-note">📱 알림은 <strong>홈화면에 설치된 앱</strong>에서 작동해요 (iOS 16.4 이상). 앱을 열 때 일정을 확인해서 알려주며, 같은 일정은 하루에 한 번만 알려드려요.</p>
-      <p style="text-align:center;font-size:11px;color:#B8AEA4;margin-bottom:12px;">언집리스트 <strong>v22</strong></p>
+      <p style="text-align:center;font-size:11px;color:#B8AEA4;margin-bottom:12px;">언집리스트 <strong>v23</strong></p>
       <div class="form-actions">
         <button type="button" class="btn btn-primary" onclick="closeSettings()">닫기</button>
       </div>
@@ -1630,6 +1680,44 @@
       document.getElementById('calendar-grid').innerHTML = html;
       renderBanner();
       renderToday();
+      renderWeekProgress();
+    }
+
+    function renderWeekProgress() {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const weekStart = new Date(today);
+      weekStart.setDate(weekStart.getDate() - weekStart.getDay());
+      const weekEnd = new Date(weekStart);
+      weekEnd.setDate(weekEnd.getDate() + 6);
+
+      let total = 0, done = 0;
+      Object.keys(detailMeta).forEach(itemKey => {
+        const d = new Date(detailMeta[itemKey].iso + 'T00:00:00');
+        if (d >= weekStart && d <= weekEnd) {
+          total++;
+          if (tasksCompleted[itemKey]) done++;
+        }
+      });
+
+      const el = document.getElementById('weekProgress');
+      if (total === 0) {
+        el.innerHTML = `
+          <div class="week-head">
+            <span>이번 주 진행률</span>
+            <span class="count" style="color:var(--soft)">이번 주 일정 없음</span>
+          </div>
+        `;
+        return;
+      }
+      const pct = Math.round((done / total) * 100);
+      el.innerHTML = `
+        <div class="week-head">
+          <span>이번 주 진행률</span>
+          <span class="count">${done} / ${total} 완료</span>
+        </div>
+        <div class="progress-track"><div class="progress-fill" style="width:${pct}%"></div></div>
+      `;
     }
 
     function toggleByKey(itemKey) {
