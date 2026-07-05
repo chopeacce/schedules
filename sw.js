@@ -1,4 +1,4 @@
-const CACHE_NAME = 'unziplist-v27';
+const CACHE_NAME = 'unziplist-v28';
 const ASSETS = [
   './',
   './index.html',

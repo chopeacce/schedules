@@ -221,22 +221,22 @@
 
     .tab-nav {
       display: flex;
-      gap: 4px;
-      margin-bottom: 16px;
+      gap: 3px;
+      margin-bottom: 12px;
       background: #EDE4D6;
-      border-radius: 14px;
-      padding: 4px;
+      border-radius: 11px;
+      padding: 3px;
     }
 
     .tab-btn {
       flex: 1;
-      padding: 10px 6px;
+      padding: 7px 6px;
       background: transparent;
       border: none;
-      border-radius: 11px;
+      border-radius: 8px;
       color: var(--soft);
       font-weight: 700;
-      font-size: 13px;
+      font-size: 12px;
       cursor: pointer;
       font-family: inherit;
     }
@@ -260,7 +260,7 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 16px;
+      margin-bottom: 10px;
     }
 
     .calendar-header h2 {
@@ -309,8 +309,8 @@
 
     .day {
       background: white;
-      padding: 7px 4px;
-      min-height: 92px;
+      padding: 5px 3px;
+      min-height: 68px;
       position: relative;
       font-size: 12.5px;
       font-weight: 700;
@@ -320,7 +320,7 @@
     }
 
     .day .day-num {
-      margin-bottom: 5px;
+      margin-bottom: 3px;
     }
 
     .day.empty {
@@ -497,8 +497,8 @@
     .legend {
       display: flex;
       flex-wrap: wrap;
-      gap: 8px;
-      margin-bottom: 12px;
+      gap: 6px;
+      margin-bottom: 10px;
     }
 
     .legend span {
@@ -1253,7 +1253,7 @@
         <label>배경 색상 (오른쪽 아래 🎨 = 자유 색상)</label>
         <div class="palette" id="bgPalette"></div>
       </div>
-      <p style="text-align:center;font-size:11px;color:#B8AEA4;margin-bottom:12px;">앱 버전 <strong>v27</strong></p>
+      <p style="text-align:center;font-size:11px;color:#B8AEA4;margin-bottom:12px;">앱 버전 <strong>v28</strong></p>
       <div class="form-actions">
         <button type="button" class="btn btn-primary" onclick="closeSettings()">닫기</button>
       </div>
@@ -1756,7 +1756,7 @@
           const info = getTag(it.tag);
           const done = tasksCompleted[it.itemKey] ? ' done' : '';
           const memoMark = memos[it.itemKey] ? ' 📝' : '';
-          return `<div class="day-item${done}" style="border-left-color:${info.color};background:${lightBg(info.color)}" onclick="event.stopPropagation();openDetail('${it.itemKey}')">${info.label}·${it.name}${memoMark}</div>`;
+          return `<div class="day-item${done}" style="border-left-color:${info.color};background:${lightBg(info.color)}" onclick="event.stopPropagation();openDetail('${it.itemKey}')">${it.name}${memoMark}</div>`;
         }).join('');
         const todayCls = date.toDateString() === todayStr ? ' today' : '';
         html += `<div class="day${todayCls}" onclick="dayTapped('${fmtISO(date)}')"><div class="day-num">${day}</div>${itemsHtml ? `<div class="day-items">${itemsHtml}</div>` : ''}</div>`;
