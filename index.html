@@ -1290,7 +1290,7 @@
         <label>배경 색상 (오른쪽 아래 🎨 = 자유 색상)</label>
         <div class="palette" id="bgPalette"></div>
       </div>
-      <p style="text-align:center;font-size:11px;color:#B8AEA4;margin-bottom:12px;">앱 버전 <strong>v29</strong></p>
+      <p style="text-align:center;font-size:11px;color:#B8AEA4;margin-bottom:12px;">앱 버전 <strong>v30</strong></p>
       <div class="form-actions">
         <button type="button" class="btn btn-primary" onclick="closeSettings()">닫기</button>
       </div>
@@ -1480,7 +1480,7 @@
       `).join('');
       html += `
         <label class="swatch custom${!BG_PRESETS.includes(themeBg) ? ' selected' : ''}">🎨
-          <input type="color" value="${!BG_PRESETS.includes(themeBg) ? themeBg : DEFAULT_BG}" onchange="pickBg(this.value)">
+          <input type="color" value="${!BG_PRESETS.includes(themeBg) ? themeBg : DEFAULT_BG}" oninput="pickBgCustom(this)">
         </label>
       `;
       palette.innerHTML = html;
@@ -1491,6 +1491,18 @@
       applyTheme();
       saveData();
       renderBgPalette();
+    }
+
+    // Called live while dragging the native color picker.
+    // Must NOT rebuild the palette DOM — that detaches the open picker.
+    function pickBgCustom(inputEl) {
+      themeBg = inputEl.value;
+      applyTheme();
+      saveData();
+      const pal = document.getElementById('bgPalette');
+      pal.querySelectorAll('.swatch').forEach(sw => sw.classList.remove('selected'));
+      const wrap = inputEl.closest('.swatch');
+      if (wrap) wrap.classList.add('selected');
     }
 
     function openSettings() {
@@ -1599,7 +1611,7 @@
       `).join('');
       html += `
         <label class="swatch custom${!PRESET_COLORS.includes(selectedTagColor) ? ' selected' : ''}">🎨
-          <input type="color" value="${!PRESET_COLORS.includes(selectedTagColor) ? selectedTagColor : '#B9A7E0'}" onchange="customColorPicked(this.value)">
+          <input type="color" value="${!PRESET_COLORS.includes(selectedTagColor) ? selectedTagColor : '#B9A7E0'}" oninput="pickTagCustom(this)">
         </label>
       `;
       palette.innerHTML = html;
@@ -1610,9 +1622,13 @@
       renderTagManager();
     }
 
-    function customColorPicked(value) {
-      selectedTagColor = value;
-      renderTagManager();
+    // In-place update: rebuilding the palette here would break the open iOS picker.
+    function pickTagCustom(inputEl) {
+      selectedTagColor = inputEl.value;
+      const pal = document.getElementById('palette');
+      pal.querySelectorAll('.swatch').forEach(sw => sw.classList.remove('selected'));
+      const wrap = inputEl.closest('.swatch');
+      if (wrap) wrap.classList.add('selected');
     }
 
     function addCustomTag() {
