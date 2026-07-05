@@ -14,6 +14,9 @@
   <link rel="icon" type="image/png" sizes="192x192" href="icon-192-v2.png">
   
   <title>언집리스트</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Jua&display=swap" rel="stylesheet">
   <style>
     :root {
       --paper: #FBF7F2;
@@ -78,12 +81,12 @@
     }
 
     .header-title h1 {
-      font-family: Georgia, 'Noto Serif KR', 'Apple Myungjo', serif;
-      font-size: 24px;
-      font-weight: 700;
+      font-family: 'Jua', -apple-system, 'Apple SD Gothic Neo', sans-serif;
+      font-size: 25px;
+      font-weight: 400;
       margin-bottom: 3px;
       color: var(--ink);
-      letter-spacing: -0.5px;
+      letter-spacing: 0;
     }
 
     .header-title p {
@@ -261,10 +264,10 @@
     }
 
     .calendar-header h2 {
-      font-family: Georgia, 'Noto Serif KR', 'Apple Myungjo', serif;
+      font-family: 'Jua', -apple-system, 'Apple SD Gothic Neo', sans-serif;
       font-size: 21px;
-      font-weight: 700;
-      letter-spacing: -0.5px;
+      font-weight: 400;
+      letter-spacing: 0;
     }
 
     .nav-btn {
@@ -354,9 +357,9 @@
       display: flex;
       justify-content: space-between;
       align-items: baseline;
-      font-family: Georgia, 'Noto Serif KR', 'Apple Myungjo', serif;
+      font-family: 'Jua', -apple-system, 'Apple SD Gothic Neo', sans-serif;
       font-size: 15px;
-      font-weight: 700;
+      font-weight: 400;
       color: var(--ink);
     }
 
@@ -513,9 +516,9 @@
 
     /* Today tab */
     .section-title {
-      font-family: Georgia, 'Noto Serif KR', 'Apple Myungjo', serif;
+      font-family: 'Jua', -apple-system, 'Apple SD Gothic Neo', sans-serif;
       font-size: 17px;
-      font-weight: 700;
+      font-weight: 400;
       color: var(--ink);
       padding-bottom: 8px;
       border-bottom: 2px solid #E3D5C8;
@@ -1240,7 +1243,11 @@
         </span>
       </label>
       <p class="notif-note">📱 알림은 <strong>홈화면에 설치된 앱</strong>에서 작동해요 (iOS 16.4 이상). 앱을 열 때 일정을 확인해서 알려주며, 같은 일정은 하루에 한 번만 알려드려요.</p>
-      <p style="text-align:center;font-size:11px;color:#B8AEA4;margin-bottom:12px;">언집리스트 <strong>v24</strong></p>
+      <div class="form-group">
+        <label>배경 색상 (오른쪽 아래 🎨 = 자유 색상)</label>
+        <div class="palette" id="bgPalette"></div>
+      </div>
+      <p style="text-align:center;font-size:11px;color:#B8AEA4;margin-bottom:12px;">언집리스트 <strong>v25</strong></p>
       <div class="form-actions">
         <button type="button" class="btn btn-primary" onclick="closeSettings()">닫기</button>
       </div>
@@ -1310,6 +1317,10 @@
     const DISMISS_KEY = 'unziplist-dismissed-alerts';
     const CUSTOM_TAGS_KEY = 'unziplist-custom-tags';
     const NOTIF_KEY = 'unziplist-notif';
+    const THEME_KEY = 'unziplist-theme';
+    const DEFAULT_BG = '#FBF7F2';
+    const BG_PRESETS = ['#FBF7F2', '#FFF4F6', '#FAF1E8', '#F4F7F1', '#EFF4FA', '#F5F1FA', '#FDFBF6', '#F1EEE9', '#FFFFFF'];
+    let themeBg = DEFAULT_BG;
     let notifEnabled = false;
     let notifLog = {};
     let dismissedAlerts = {};
@@ -1322,6 +1333,7 @@
     // Initialize
     function init() {
       loadData();
+      applyTheme();
       renderLegend();
       renderTagOptions();
       renderCalendar();
@@ -1379,9 +1391,36 @@
       sel.innerHTML = html;
     }
 
+    function applyTheme() {
+      document.documentElement.style.setProperty('--paper', themeBg);
+      const meta = document.querySelector('meta[name="theme-color"]');
+      if (meta) meta.setAttribute('content', themeBg);
+    }
+
+    function renderBgPalette() {
+      const palette = document.getElementById('bgPalette');
+      let html = BG_PRESETS.map(c => `
+        <button type="button" class="swatch${c === themeBg ? ' selected' : ''}" style="background:${c};border:2px solid #E0D6CA${c === themeBg ? ';border-color:var(--ink)' : ''}" onclick="pickBg('${c}')"></button>
+      `).join('');
+      html += `
+        <label class="swatch custom${!BG_PRESETS.includes(themeBg) ? ' selected' : ''}">🎨
+          <input type="color" value="${!BG_PRESETS.includes(themeBg) ? themeBg : DEFAULT_BG}" onchange="pickBg(this.value)">
+        </label>
+      `;
+      palette.innerHTML = html;
+    }
+
+    function pickBg(c) {
+      themeBg = c;
+      applyTheme();
+      saveData();
+      renderBgPalette();
+    }
+
     function openSettings() {
       const box = document.getElementById('notifToggle');
       box.checked = notifEnabled && typeof Notification !== 'undefined' && Notification.permission === 'granted';
+      renderBgPalette();
       document.getElementById('settingsModal').classList.add('active');
     }
 
@@ -1579,6 +1618,11 @@
         notifEnabled = !!n.enabled;
         notifLog = n.log || {};
       }
+
+      const storedTheme = localStorage.getItem(THEME_KEY);
+      if (storedTheme) {
+        themeBg = JSON.parse(storedTheme).bg || DEFAULT_BG;
+      }
     }
 
     function saveData() {
@@ -1589,6 +1633,7 @@
       localStorage.setItem(DISMISS_KEY, JSON.stringify(dismissedAlerts));
       localStorage.setItem(CUSTOM_TAGS_KEY, JSON.stringify(customTags));
       localStorage.setItem(NOTIF_KEY, JSON.stringify({ enabled: notifEnabled, log: notifLog }));
+      localStorage.setItem(THEME_KEY, JSON.stringify({ bg: themeBg }));
     }
 
     // Tab switching
